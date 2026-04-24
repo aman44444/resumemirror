@@ -50,8 +50,10 @@ Return ONLY a valid JSON object in this exact format, no extra text:
     const data = JSON.parse(clean);
 
     return NextResponse.json(data);
-  } catch (error) {
-    console.error("Tailor API error:", error);
+  } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong"
+  console.error("Tailor API error:", message)
+
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
       { status: 500 },
