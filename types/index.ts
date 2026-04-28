@@ -22,3 +22,17 @@ export type RedFlagResult = {
   flags: RedFlag[]
   summary: string
 }
+
+export type InterviewQuestion = {
+  question: string
+  difficulty: "easy" | "medium" | "hard"
+  category: string
+  whyAsked: string
+  suggestedAnswer: string
+}
+
+export type InterviewResult = {
+  overallReadiness: number
+  questions: InterviewQuestion[]
+  summary: string
+}
