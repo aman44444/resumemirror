@@ -2,7 +2,8 @@
 import ResultsSkeleton from "@/components/ResultsSkeleton";
 import { exportToPdf } from "@/lib/exportPdf";
 import { useState } from "react";
-import { TailorResult , RedFlagResult } from "@/types";
+import InterviewPrep from "@/components/InterviewPrep";
+import { TailorResult, RedFlagResult, InterviewResult } from "@/types";
 import RedFlagResults from "@/components/RedFlagResult";
 
 export default function Home() {
@@ -11,11 +12,16 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TailorResult | null>(null);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"tailor" | "redflags">("tailor");
+  const [activeTab, setActiveTab] = useState<
+    "tailor" | "redflags" | "interview"
+  >("tailor");
   const [redFlagResult, setRedFlagResult] = useState<RedFlagResult | null>(
     null,
   );
   const [redFlagLoading, setRedFlagLoading] = useState(false);
+  const [interviewResult, setInterviewResult] =
+    useState<InterviewResult | null>(null);
+  const [interviewLoading, setInterviewLoading] = useState(false);
 
   async function handleSubmit() {
     if (!jobDescription.trim() || !resume.trim()) {
@@ -74,120 +80,175 @@ export default function Home() {
     }
   }
 
-return (
-  <main className="min-h-screen bg-gray-50">
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-2xl font-medium text-gray-800">Resume Mirror</h1>
-      <p className="text-gray-500 mt-1 text-sm mb-10">
-        Tailor your resume to any job description in seconds
-      </p>
+  async function handleInterview() {
+    if (!jobDescription.trim() || !resume.trim()) {
+      setError("Please fill in both job description and resume");
+      return;
+    }
+    setInterviewLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/interview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobDescription, resume }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setInterviewResult(data);
+      setActiveTab("interview");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong";
+      setError(message);
+    } finally {
+      setInterviewLoading(false);
+    }
+  }
 
-      {loading || redFlagLoading ? (
-        <ResultsSkeleton />
-      ) : !result && !redFlagResult ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">
-              Job Description
-            </label>
-            <textarea
-              className="w-full h-64 p-4 text-sm border border-gray-200 rounded-xl bg-white resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-800"
-              placeholder="Paste the job description here..."
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-            />
-          </div>
+  return (
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <h1 className="text-2xl font-medium text-gray-800">Resume Mirror</h1>
+        <p className="text-gray-500 mt-1 text-sm mb-10">
+          Tailor your resume to any job description in seconds
+        </p>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">
-              Your Resume
-            </label>
-            <textarea
-              className="w-full h-64 p-4 text-sm border border-gray-200 rounded-xl bg-white resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-800"
-              placeholder="Paste your resume text here..."
-              value={resume}
-              onChange={(e) => setResume(e.target.value)}
-            />
-          </div>
+        {loading || redFlagLoading || interviewLoading ? (
+          <ResultsSkeleton />
+        ) : !result && !redFlagResult && !interviewResult ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Job Description
+              </label>
+              <textarea
+                className="w-full h-64 p-4 text-sm border border-gray-200 rounded-xl bg-white resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-800"
+                placeholder="Paste the job description here..."
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+              />
+            </div>
 
-          {error && (
-            <p className="md:col-span-2 text-sm text-red-500">{error}</p>
-          )}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Your Resume
+              </label>
+              <textarea
+                className="w-full h-64 p-4 text-sm border border-gray-200 rounded-xl bg-white resize-none focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-800"
+                placeholder="Paste your resume text here..."
+                value={resume}
+                onChange={(e) => setResume(e.target.value)}
+              />
+            </div>
 
-          <div className="md:col-span-2 flex flex-col gap-3">
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full py-3 bg-gray-800 text-white text-sm font-medium rounded-xl hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? "Analyzing your resume..." : "Tailor My Resume"}
-            </button>
-            <button
-              onClick={handleRedFlags}
-              disabled={redFlagLoading}
-              className="w-full py-3 border border-red-200 text-red-600 bg-red-50 text-sm font-medium rounded-xl hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {redFlagLoading ? "Scanning..." : "Scan for Recruiter Red Flags"}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <div className="flex gap-2 mb-6 border-b border-gray-200">
-            {result && (
-              <button
-                onClick={() => setActiveTab("tailor")}
-                className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === "tailor"
-                    ? "border-gray-800 text-gray-800"
-                    : "border-transparent text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                Tailored Resume
-              </button>
+            {error && (
+              <p className="md:col-span-2 text-sm text-red-500">{error}</p>
             )}
-            {redFlagResult && (
-              <button
-                onClick={() => setActiveTab("redflags")}
-                className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === "redflags"
-                    ? "border-red-500 text-red-600"
-                    : "border-transparent text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                Red Flags {redFlagResult.flags.length > 0 && `(${redFlagResult.flags.length})`}
-              </button>
-            )}
-            <button
-              onClick={() => {
-                setResult(null)
-                setRedFlagResult(null)
-                setActiveTab("tailor")
-              }}
-              className="ml-auto pb-3 px-1 text-sm text-gray-400 hover:text-gray-600"
-            >
-              ← Start over
-            </button>
-          </div>
 
-          {activeTab === "tailor" && result && (
-            <ResultsView
-              result={result}
-              onReset={() => {
-                setResult(null)
-                setRedFlagResult(null)
-                setActiveTab("tailor")
-              }}
-            />
-          )}
-          {activeTab === "redflags" && redFlagResult && (
-            <RedFlagResults data={redFlagResult} />
-          )}
-        </div>
-      )}
-    </div>
-  </main>
-)
+            <div className="md:col-span-2 flex flex-col gap-3">
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="w-full py-3 bg-gray-800 text-white text-sm font-medium rounded-xl hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? "Analyzing your resume..." : "Tailor My Resume"}
+              </button>
+              <button
+                onClick={handleRedFlags}
+                disabled={redFlagLoading}
+                className="w-full py-3 border border-red-200 text-red-600 bg-red-50 text-sm font-medium rounded-xl hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {redFlagLoading
+                  ? "Scanning..."
+                  : "Scan for Recruiter Red Flags"}
+              </button>
+              <button
+                onClick={handleInterview}
+                disabled={interviewLoading}
+                className="w-full py-3 border border-purple-200 text-purple-600 bg-purple-50 text-sm font-medium rounded-xl hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {interviewLoading
+                  ? "Generating questions..."
+                  : "Predict Interview Questions"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="flex gap-2 mb-6 border-b border-gray-200">
+              {result && (
+                <button
+                  onClick={() => setActiveTab("tailor")}
+                  className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === "tailor"
+                      ? "border-gray-800 text-gray-800"
+                      : "border-transparent text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  Tailored Resume
+                </button>
+              )}
+              {redFlagResult && (
+                <button
+                  onClick={() => setActiveTab("redflags")}
+                  className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === "redflags"
+                      ? "border-red-500 text-red-600"
+                      : "border-transparent text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  Red Flags{" "}
+                  {redFlagResult.flags.length > 0 &&
+                    `(${redFlagResult.flags.length})`}
+                </button>
+              )}
+              {interviewResult && (
+                <button
+                  onClick={() => setActiveTab("interview")}
+                  className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === "interview"
+                      ? "border-purple-500 text-purple-600"
+                      : "border-transparent text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  Interview Prep ({interviewResult.questions.length})
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setResult(null);
+                  setRedFlagResult(null);
+                  setInterviewResult(null);
+                  setActiveTab("tailor");
+                }}
+                className="ml-auto pb-3 px-1 text-sm text-gray-400 hover:text-gray-600"
+              >
+                ← Start over
+              </button>
+            </div>
+
+            {activeTab === "tailor" && result && (
+              <ResultsView
+                result={result}
+                onReset={() => {
+                  setResult(null);
+                  setRedFlagResult(null);
+                  setActiveTab("tailor");
+                }}
+              />
+            )}
+            {activeTab === "redflags" && redFlagResult && (
+              <RedFlagResults data={redFlagResult} />
+            )}
+            {activeTab === "interview" && interviewResult && (
+              <InterviewPrep data={interviewResult} />
+            )}
+          </div>
+        )}
+      </div>
+    </main>
+  );
 }
 
 function ResultsView({
