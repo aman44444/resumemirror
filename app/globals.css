@@ -1,2 +1,48 @@
 @import "tailwindcss";
 
+.liquidGlass-wrapper {
+  position: relative;
+  border-radius: 20px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.liquidGlass-effect {
+  position: absolute;
+  inset: 0;
+  filter: url(#glass-distortion);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: inherit;
+  z-index: 0;
+}
+
+.liquidGlass-tint {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.liquidGlass-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 2;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.0) 50%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  border: 0.5px solid rgba(255, 255, 255, 0.75);
+}
+
+.liquidGlass-text {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
