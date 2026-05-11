@@ -6,6 +6,8 @@ export function useInterview() {
   const [data, setData] = useState<InterviewResult | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const reset = () => setData(null)
+
   const run = async (jobDescription: string, resume: string) => {
     setLoading(true)
 
@@ -21,5 +23,5 @@ export function useInterview() {
     }
   }
 
-  return { data, loading, run }
+  return { data, loading, run, reset }
 }

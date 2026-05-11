@@ -6,6 +6,8 @@ export function useRedFlags() {
   const [data, setData] = useState<RedFlagResult | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const reset = () => setData(null)
+
   const run = async (resume: string) => {
     setLoading(true)
 
@@ -20,5 +22,5 @@ export function useRedFlags() {
     }
   }
 
-  return { data, loading, run }
+  return { data, loading, run, reset }
 }

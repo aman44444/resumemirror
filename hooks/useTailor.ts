@@ -7,6 +7,8 @@ export function useTailor() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  const reset = () => setData(null)
+
   const run = async (jobDescription: string, resume: string) => {
     setLoading(true)
     setError("")
@@ -25,5 +27,5 @@ export function useTailor() {
     }
   }
 
-  return { data, loading, error, run }
+  return { data, loading, error, run , reset}
 }
