@@ -1,26 +1,36 @@
 import { useState } from "react"
-import { fetcher } from "@/lib/api/fetcher"
 import { RedFlagResult } from "@/types"
+import { scanRedFlags } from "@/lib/api/api"
 
 export function useRedFlags() {
-  const [data, setData] = useState<RedFlagResult | null>(null)
+  const [result, setResult] = useState<RedFlagResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const reset = () => setData(null)
-
-  const run = async (resume: string) => {
+  async function run(resume: string) {
+    if (!resume.trim()) {
+      setError("Please paste your resume first")
+      return false
+    }
     setLoading(true)
-
+    setError("")
+    setResult(null)
     try {
-      const res = await fetcher<RedFlagResult>("/api/ai/redflags", {
-        resume,
-      })
-
-      setData(res)
+      const data = await scanRedFlags(resume)
+      setResult(data)
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
+      return false
     } finally {
       setLoading(false)
     }
   }
 
-  return { data, loading, run, reset }
+  function reset() {
+    setResult(null)
+    setError("")
+  }
+
+  return { result, loading, error, run, reset }
 }

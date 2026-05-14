@@ -1,27 +1,36 @@
 import { useState } from "react"
-import { fetcher } from "@/lib/api/fetcher"
 import { InterviewResult } from "@/types"
+import { predictInterview } from "@/lib/api/api"
 
 export function useInterview() {
-  const [data, setData] = useState<InterviewResult | null>(null)
+  const [result, setResult] = useState<InterviewResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const reset = () => setData(null)
-
-  const run = async (jobDescription: string, resume: string) => {
+  async function run(jobDescription: string, resume: string) {
+    if (!jobDescription.trim() || !resume.trim()) {
+      setError("Please fill in both fields")
+      return false
+    }
     setLoading(true)
-
+    setError("")
+    setResult(null)
     try {
-      const res = await fetcher<InterviewResult>("/api/ai/interview", {
-        jobDescription,
-        resume,
-      })
-
-      setData(res)
+      const data = await predictInterview(jobDescription, resume)
+      setResult(data)
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
+      return false
     } finally {
       setLoading(false)
     }
   }
 
-  return { data, loading, run, reset }
+  function reset() {
+    setResult(null)
+    setError("")
+  }
+
+  return { result, loading, error, run, reset }
 }

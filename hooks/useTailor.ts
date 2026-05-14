@@ -1,31 +1,36 @@
 import { useState } from "react"
-import { fetcher } from "@/lib/api/fetcher"
 import { TailorResult } from "@/types"
+import { tailorResume } from "@/lib/api/api"
 
 export function useTailor() {
-  const [data, setData] = useState<TailorResult | null>(null)
+  const [result, setResult] = useState<TailorResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const reset = () => setData(null)
-
-  const run = async (jobDescription: string, resume: string) => {
+  async function run(jobDescription: string, resume: string) {
+    if (!jobDescription.trim() || !resume.trim()) {
+      setError("Please fill in both fields")
+      return false
+    }
     setLoading(true)
     setError("")
-
+    setResult(null)
     try {
-      const res = await fetcher<TailorResult>("/api/ai/tailor", {
-        jobDescription,
-        resume,
-      })
-
-      setData(res)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error")
+      const data = await tailorResume(jobDescription, resume)
+      setResult(data)
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
+      return false
     } finally {
       setLoading(false)
     }
   }
 
-  return { data, loading, error, run , reset}
+  function reset() {
+    setResult(null)
+    setError("")
+  }
+
+  return { result, loading, error, run, reset }
 }
