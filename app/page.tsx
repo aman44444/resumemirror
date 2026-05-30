@@ -61,11 +61,7 @@ export default function Home() {
     }}>
       <LiquidGlassSVG />
 
-      <nav className="sticky top-0 z-50 px-6 py-3" style={{
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        background: "rgba(247,247,245,0.6)",
-      }}>
+      <nav className="sticky top-0 z-50 px-6 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <LiquidGlassPill className="px-3 py-1.5 hover:opacity-90 transition-opacity">
             <div className="w-5 h-5 bg-gray-900 rounded-md flex items-center justify-center flex-shrink-0">
@@ -73,9 +69,7 @@ export default function Home() {
             </div>
             <span className="text-sm font-medium text-gray-900">Resume Mirror</span>
           </LiquidGlassPill>
-          <LiquidGlassPill className="px-3 py-1.5">
             <span className="text-xs text-gray-600 font-medium">Free — no signup needed</span>
-          </LiquidGlassPill>
         </div>
       </nav>
 
