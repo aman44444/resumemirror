@@ -33,19 +33,14 @@ function WordCount({ text }: { text: string }) {
 }
 
 function AccordionInput({
-  label,
-  value,
-  onChange,
-  open,
-  onToggle,
-  placeholder,
+  label, value, onChange, open, onToggle, placeholder,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  open: boolean;
-  onToggle: () => void;
-  placeholder: string;
+  label: string
+  value: string
+  onChange: (v: string) => void
+  open: boolean
+  onToggle: () => void
+  placeholder: string
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -54,12 +49,8 @@ function AccordionInput({
         className="flex items-center justify-between px-1 py-0.5"
       >
         <div className="flex items-center gap-2">
-          <div
-            className={`w-1.5 h-1.5 rounded-full transition-colors ${value.trim() ? "bg-green-400" : "bg-gray-300"}`}
-          />
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            {label}
-          </span>
+          <div className={`w-1.5 h-1.5 rounded-full transition-colors ${value.trim() ? "bg-green-400" : "bg-gray-300"}`} />
+          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</span>
         </div>
         <div className="flex items-center gap-2">
           <WordCount text={value} />
@@ -68,14 +59,28 @@ function AccordionInput({
       </button>
 
       <div
-        className={`overflow-hidden transition-all duration-300 ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+        style={{ isolation: "isolate" }}
+        className={`overflow-hidden transition-all duration-300 relative z-10 ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
       >
-        <textarea
-          className="w-full h-56 p-4 text-sm border border-gray-200 rounded-2xl bg-white resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent text-gray-800 placeholder:text-gray-300"
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
+        <div className="relative">
+          <textarea
+            className="w-full h-56 p-4 text-sm border border-gray-200 rounded-2xl bg-white resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent text-gray-800 placeholder:text-gray-300"
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          {value.trim() && (
+            <button
+              onClick={() => onChange("")}
+              className="absolute top-3 right-5 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              title="Clear"
+            >
+              <svg className="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {!open && (
@@ -89,7 +94,7 @@ function AccordionInput({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export function InputPanel({
