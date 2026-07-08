@@ -2,6 +2,9 @@ import { useState, useEffect } from "react"
 
 const STORAGE_KEY = "resume-mirror-inputs"
 
+type PanelKey = "jobDescription" | "resume";
+
+
 function loadFromStorage() {
   if (typeof window === "undefined") return { jobDescription: "", resume: "" }
   try {
@@ -16,8 +19,10 @@ function loadFromStorage() {
 export function useInputs() {
   const [jobDescription, setJobDescriptionRaw] = useState("")
   const [resume, setResumeRaw] = useState("")
-  const [jdOpen, setJdOpen] = useState(false)
-  const [resumeOpen, setResumeOpen] = useState(false)
+  const [openPanels, setOpenPanels] = useState<Record<PanelKey, boolean>>({
+  jobDescription: false,
+  resume: false,
+});
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
@@ -44,8 +49,11 @@ export function useInputs() {
   }
 
   function reset() {
-    setJdOpen(false)
-    setResumeOpen(false)
+   setOpenPanels({
+      jobDescription: false,
+      resume: false,
+  });
+
   }
 
   function clearStorage() {
@@ -59,10 +67,13 @@ export function useInputs() {
     setJobDescription,
     resume,
     setResume,
-    jdOpen,
-    setJdOpen,
-    resumeOpen,
-    setResumeOpen,
+    // jdOpen,
+    // setJdOpen,
+    // resumeOpen,
+    // setResumeOpen,
+      openPanels,
+  setOpenPanels,
+
     reset,
     clearStorage,
   }
