@@ -101,7 +101,7 @@ function AccordionInput({
       <button
         type="button"
         onClick={onToggle}
-        className="flex items-center justify-between px-1 py-0.5"
+        className="flex items-center justify-between px-1 py-0.5 cursor-pointer"
       >
         <div className="flex items-center gap-2">
           <div
@@ -146,7 +146,7 @@ function AccordionInput({
         <button
           type="button"
           onClick={onToggle}
-          className="flex h-12 items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/60 transition-all hover:border-gray-300 hover:bg-white"
+          className="flex h-12 items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/60 transition-all hover:border-gray-300 hover:bg-white cursor-pointer"
         >
           <span className="text-xs text-gray-300">
             {hasContent ? "Click to edit" : "Click to paste"}
