@@ -19,7 +19,7 @@ export function ActionCard({
     <button
       onClick={onClick}
       disabled={loading}
-      className={`w-full text-left p-5 bg-white border border-gray-200 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed ${borderAccent} hover:shadow-sm`}
+      className={`w-full text-left p-5 bg-white border border-gray-200 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${borderAccent} hover:shadow-sm`}
     >
       <div className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center mb-3`}>
         <span className={`${iconColor} text-sm`}>{icon}</span>
