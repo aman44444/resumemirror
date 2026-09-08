@@ -1,5 +1,5 @@
-import { memo } from "react";
-// Lightweight replacement for `clsx` to avoid an external dependency
+import { memo, useRef, useState } from "react";
+import { extractTextFromPdf } from "@/lib/extractPdfText";
 function clsx(...inputs: Array<string | false | null | undefined>) {
   return inputs.filter(Boolean).join(" ");
 }
@@ -12,10 +12,8 @@ export type InputPanelProps = {
   resume: string;
   setResume: (value: string) => void;
   openPanels: Record<FieldKey, boolean>;
-  setOpenPanels: React.Dispatch<
-    React.SetStateAction<Record<FieldKey, boolean>>
-  >;
-};
+  setOpenPanels: React.Dispatch<React.SetStateAction<Record<FieldKey, boolean>>>;
+}
 
 const ChevronIcon = memo(({ open }: { open: boolean }) => (
   <svg
@@ -58,7 +56,7 @@ function ClearButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       title="Clear"
-      className="absolute top-3 right-5 flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+      className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
     >
       <svg
         className="h-3 w-3 text-gray-500"
@@ -85,6 +83,102 @@ type AccordionInputProps = {
   onToggle: () => void;
   onChange: (value: string) => void;
 };
+
+function UploadPdfButton({
+  onExtracted,
+}: {
+  onExtracted: (text: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [status, setStatus] = useState<"idle" | "parsing" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    // Allow re-uploading the same file later.
+    e.target.value = "";
+    if (!file) return;
+
+    setStatus("parsing");
+    setError(null);
+
+    try {
+      const text = await extractTextFromPdf(file);
+      onExtracted(text);
+      setStatus("idle");
+    } catch (err) {
+      setStatus("error");
+      setError(err instanceof Error ? err.message : "Couldn't read that PDF.");
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={status === "parsing"}
+        className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 disabled:opacity-60"
+      >
+        {status === "parsing" ? (
+          <>
+            <svg
+              className="h-3 w-3 animate-spin text-gray-500"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              />
+            </svg>
+            Reading PDF...
+          </>
+        ) : (
+          <>
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 16V4m0 0L7 9m5-5l5 5M5 20h14"
+              />
+            </svg>
+            Upload PDF
+          </>
+        )}
+      </button>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        onChange={handleFile}
+        className="hidden"
+      />
+
+      {status === "error" && error && (
+        <span className="max-w-[180px] text-right text-[11px] text-red-500">
+          {error}
+        </span>
+      )}
+    </div>
+  );
+}
 
 function AccordionInput({
   label,
@@ -136,9 +230,10 @@ function AccordionInput({
             className="h-56 w-full resize-none rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-800 placeholder:text-gray-300 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-gray-200"
           />
 
-          {hasContent && (
-            <ClearButton onClick={() => onChange("")} />
-          )}
+          <div className="absolute top-3 right-5 flex items-center gap-2">
+            <UploadPdfButton onExtracted={onChange} />
+            {hasContent && <ClearButton onClick={() => onChange("")} />}
+          </div>
         </div>
       </div>
 
@@ -149,7 +244,7 @@ function AccordionInput({
           className="flex h-12 items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/60 transition-all hover:border-gray-300 hover:bg-white cursor-pointer"
         >
           <span className="text-xs text-gray-300">
-            {hasContent ? "Click to edit" : "Click to paste"}
+            {hasContent ? "Click to edit" : "Click to paste or upload a PDF"}
           </span>
         </button>
       )}
