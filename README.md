@@ -30,7 +30,6 @@ An AI-powered resume tailoring tool that helps job seekers land more interviews 
 
 ```bash
 git clone https://github.com/yourusername/resumemirror.git
-cd resumemirror
 ```
 
 2. Install dependencies
